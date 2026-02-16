@@ -411,33 +411,32 @@ class SCGMAutoBR:
             self.lbl_timer.config(text=f"Timer: {h:02}:{m:02}:{s:02}")
             self.root.after(1000, self.update_timer)
 
-    def human_click(self, x, y):
-        """Moves mouse smoothly and clicks using pydirectinput for better game compatibility."""
+    def human_click(self, x, y, move=True):
+        """Moves mouse smoothly and clicks. If move=False, just clicks at current pos."""
         if not self.is_running: return
         
-        # Randomize target slightly within a reasonable button area
-        target_x = int(x + random.randint(-8, 8))
-        target_y = int(y + random.randint(-8, 8))
+        if move:
+            # Randomize target slightly within a reasonable button area
+            target_x = int(x + random.randint(-8, 8))
+            target_y = int(y + random.randint(-8, 8))
+            
+            pydirectinput.moveTo(target_x, target_y, duration=random.uniform(0.3, 0.5))
+            time.sleep(0.2) # Pause for game to register position
+            # Hover Wiggle - Only to the left
+            pydirectinput.moveRel(random.randint(-4, -1), 0, relative=True)
+            time.sleep(0.3) # Stabilization before click
         
-        pydirectinput.moveTo(target_x, target_y, duration=random.uniform(0.4, 0.8))
-        time.sleep(random.uniform(0.1, 0.2))
-        pydirectinput.moveRel(random.randint(-3, 3), random.randint(-3, 3), relative=True)
-        
-        # Short pause before clicking
-        time.sleep(random.uniform(0.1, 0.4))
-        
-        # Click and Hold
+        # Click and Hold (More deliberate)
         pydirectinput.mouseDown()
-        time.sleep(random.uniform(0.05, 0.15))
+        time.sleep(random.uniform(0.15, 0.25))
         pydirectinput.mouseUp()
-        time.sleep(1.0) # Delay after click to let UI update
+        time.sleep(0.5) # Wait for UI response
 
-    def find_and_click(self, img_name, timeout=1):
+    def find_and_click(self, img_name, clicks=1):
         if not self.is_running: return False
         
         path = self.config["images"][img_name]
         if not os.path.exists(path):
-            # self.log(f"Warning: Missing asset {path}")
             return False
             
         try:
@@ -446,6 +445,8 @@ class SCGMAutoBR:
                 center = pyautogui.center(pos)
                 self.log(f"Found {img_name}!")
                 self.human_click(center.x, center.y)
+                for _ in range(clicks - 1):
+                    self.human_click(center.x, center.y, move=False)
                 return True
         except Exception as e:
             pass
@@ -476,16 +477,18 @@ class SCGMAutoBR:
             
             # Periodic AFK click and Leave check if button visible (every 60s)
             is_leave_visible = self.is_image_visible("return_to_lobby_alone", confidence=0.7)
-            if is_leave_visible and (time.time() - self.last_punch_time > 60):
-                pydirectinput.click() # AFK prevention
-                self.last_punch_time = time.time()
+            # (Merged AFK click into the periodic button check below to stay clean)
             
             if is_leave_visible and (time.time() - self.last_leave_click_time > 60):
-                if mode == "quick": # Only click the actual button in Quick Leave
-                    if self.find_and_click("return_to_lobby_alone"):
-                        self.log("Quick Leave: Exit button clicked.")
+                if mode == "quick":
+                    if self.find_and_click("return_to_lobby_alone", clicks=2):
+                        self.log("Quick Leave: Exit button clicked (2x).")
                         self.last_leave_click_time = time.time()
-                else: # In Full Match, just update time to keep it periodic for AFK click
+                else: 
+                    # AFK prevention: 2 clicks at current pos in Full Match
+                    pydirectinput.click()
+                    time.sleep(0.2)
+                    pydirectinput.click()
                     self.last_leave_click_time = time.time()
             
             # 3. Sub-actions (Look around)
@@ -517,14 +520,15 @@ class SCGMAutoBR:
             self.human_click(pos1[0], pos1[1]) # Safe human-like click
             time.sleep(1.5) # Reduced extra sleep since human_click has built-in 1s
             
-            # 3. Click Pos #2 11 times, every 0.5s
+            # 3. Click Pos #2 11 times
             pos2 = self.config.get("pos_2", [0, 0])
             for i in range(11):
                 if not self.is_running: break
-                self.human_click(pos2[0], pos2[1])
-                # Note: human_click has internal movement and 1s delay.
-                # If 0.5s is strictly required, we might need a faster version,
-                # but 'human interaction' was specifically requested.
+                # Move only on the first click, then stay at the same position
+                should_move = (i == 0)
+                self.human_click(pos2[0], pos2[1], move=should_move)
+                if not should_move:
+                    time.sleep(0.2) # Extra small gap for fast repeat clicks
             
             # 4. Press M, wait 1s
             pydirectinput.press('m')
@@ -543,10 +547,13 @@ class SCGMAutoBR:
             while self.is_running:
                 is_leave_visible = self.is_image_visible("return_to_lobby_alone", confidence=0.7)
                 
-                # Punch Logic: 60s if button visible, 0.05s otherwise
+                # Punch Logic: Click 2x if button visible (60s), 1x otherwise (0.05s)
                 punch_interval = 60 if is_leave_visible else 0.05
                 if time.time() - self.last_punch_time > punch_interval:
                     pydirectinput.click()
+                    if is_leave_visible:
+                        time.sleep(0.2)
+                        pydirectinput.click() # Double click for AFK
                     self.last_punch_time = time.time()
                 
                 # Move after 2 minutes

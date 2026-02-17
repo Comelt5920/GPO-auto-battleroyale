@@ -13,6 +13,7 @@ dist/
 # Bot Specific
 config.json
 debug_log.txt
+match_finish.png
 assets/*.png
 !assets/.gitkeep
 

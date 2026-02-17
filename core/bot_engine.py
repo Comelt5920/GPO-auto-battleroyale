@@ -116,6 +116,7 @@ class BotEngine:
             time.sleep(0.5)
         
         if match_started:
+            self.match_start_time = time.time() # Start timing NOW
             self.app.match_count += 1
             self.app.update_match_count()
             self.log(f"Match #{self.app.match_count} STARTED!")

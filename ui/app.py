@@ -197,20 +197,28 @@ class SCGMAutoBR:
     def log(self, msg, is_error=False):
         timestamp = datetime.now().strftime("%H:%M:%S")
         full_ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.console.configure(state='normal')
-        self.console.insert(tk.END, f"[{timestamp}] {msg}\n")
-        self.console.see(tk.END)
-        self.console.configure(state='disabled')
+        
+        def _update_ui():
+            self.console.configure(state='normal')
+            self.console.insert(tk.END, f"[{timestamp}] {msg}\n")
+            self.console.see(tk.END)
+            self.console.configure(state='disabled')
+        
+        self.root.after(0, _update_ui)
+        
         try:
             with open(LOG_FILE, "a", encoding="utf-8") as f:
                 f.write(f"[{full_ts}] {'[ERROR] ' if is_error else ''}{msg}\n")
         except: pass
 
     def update_status(self, text, color):
-        self.status_label.config(text=f"Status: {text}", foreground=color)
+        self.root.after(0, lambda: self.status_label.config(text=f"Status: {text}", foreground=color))
 
     def update_match_count(self):
-        self.lbl_match.config(text=f"Matches: {self.match_count}")
+        self.root.after(0, lambda: self.lbl_match.config(text=f"Matches: {self.match_count}"))
+
+    def update_timer_ui(self, time_str):
+        self.root.after(0, lambda: self.lbl_timer.config(text=f"Timer: {time_str}"))
 
     def on_mode_change(self):
         self.config["match_mode"] = self.mode_var.get()

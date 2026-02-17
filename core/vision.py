@@ -20,8 +20,8 @@ def find_and_click(img_name, config, is_running_check, log_func, clicks=1):
     if not is_running_check():
         return False
     
-    path = config["images"][img_name]
-    if not os.path.exists(path):
+    path = config["images"].get(img_name)
+    if not path or not os.path.exists(path):
         return False
         
     try:

@@ -2,7 +2,7 @@ import os
 import json
 
 CONFIG_FILE = "config.json"
-ASSETS_DIR = "assets"
+ASSETS_DIR = os.path.join("src", "assets")
 LOG_FILE = "debug_log.txt"
 
 def load_config():
@@ -13,13 +13,13 @@ def load_config():
         "match_mode": "full", # New: "full" or "quick"
         "movement_duration": 300,  # 5 minutes in seconds
         "images": {
-            "change": "change.png",
-            "br_mode": "br_mode.png",
-            "solo_mode": "solo_mode.png",
-            "return_to_lobby_alone": "leave.png",
-            "ultimate": "ultimate.png",                 
-            "open": "open.png",
-            "continue": "continue.png"
+            "change": "src/assets/change.png",
+            "br_mode": "src/assets/br_mode.png",
+            "solo_mode": "src/assets/solo_mode.png",
+            "return_to_lobby_alone": "src/assets/leave.png",
+            "ultimate": "src/assets/ultimate.png",                 
+            "open": "src/assets/open.png",
+            "continue": "src/assets/continue.png"
         },
         "pos_1": [100, 100],
         "pos_2": [200, 200],

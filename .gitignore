@@ -14,8 +14,8 @@ dist/
 config.json
 debug_log.txt
 match_finish.png
-assets/*.png
-!assets/.gitkeep
+src/assets/*.png
+!src/assets/.gitkeep
 
 # IDEs
 .vscode/

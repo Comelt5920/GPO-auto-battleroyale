@@ -1,5 +1,5 @@
 import tkinter as tk
-from ui.app import SCGMAutoBR
+from src.ui.app import SCGMAutoBR
 
 if __name__ == "__main__":
     root = tk.Tk()

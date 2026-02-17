@@ -10,10 +10,10 @@ from PIL import Image, ImageTk
 import pyautogui
 import keyboard
 
-from utils.config import load_config, save_config, ASSETS_DIR, LOG_FILE
-from ui.components import CoordinatePicker, AreaPicker
-from core.bot_engine import BotEngine
-from core.vision import ScreenCaptureTool
+from src.utils.config import load_config, save_config, ASSETS_DIR, LOG_FILE
+from src.ui.components import CoordinatePicker, AreaPicker
+from src.core.bot_engine import BotEngine
+from src.core.vision import ScreenCaptureTool
 
 class SCGMAutoBR:
     def __init__(self, root):
@@ -341,7 +341,7 @@ class SCGMAutoBR:
             self.log("Please enter a Webhook URL first.", is_error=True)
             return
         self.log("Sending test message to Discord...")
-        from utils.discord import send_discord
+        from src.utils.discord import send_discord
         send_discord(webhook, "✅ [SCGM-Auto-Br] Webhook Test Successful!")
 
     def update_timer(self):

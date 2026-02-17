@@ -2,7 +2,7 @@ import os
 import pyautogui
 from PIL import Image, ImageTk
 import tkinter as tk
-from core.controller import human_click
+from src.core.controller import human_click
 
 def is_image_visible(img_name, config, confidence=None):
     """Checks if an image is on screen without clicking it."""

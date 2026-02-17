@@ -3,9 +3,9 @@ import random
 import traceback
 import pydirectinput
 import pyautogui
-from core.vision import is_image_visible, find_and_click
-from core.controller import human_click
-from utils.discord import send_discord
+from src.core.vision import is_image_visible, find_and_click
+from src.core.controller import human_click
+from src.utils.discord import send_discord
 
 class BotEngine:
     def __init__(self, app):
@@ -311,7 +311,7 @@ class BotEngine:
             if is_open_v:
                 # If we see Open, click it and RESET the failsafe timer
                 if find_and_click("open", self.app.config, self.is_running, self.log, clicks=2):
-                    last_found_any_time = time.time()
+                    last_progress_time = time.time()
                 time.sleep(2)
             
             if is_continue_v:
